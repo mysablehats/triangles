@@ -53,7 +53,7 @@ N = cross(a,b)/norm(cross(a,b));
 % no need to calculate p0 actually...
 % p0 = P +(dot(N,A)-dot(N,P))*N;
 % D = norm(P-p0);
-D = dot(N,A)-dot(N,P);
+D0 = dot(N,A)-dot(N,P);
 
 S = linsolve([A B C],p0);
 
@@ -61,23 +61,20 @@ if any(S>1)||any(S<0)
     % this means that the point is exterior to the triangle
     %must do tons of checks
     %A if the only positive is alpha
-    D = [];
-    %% since there is a problem with obtuse triangles I 
-    if S(1)>0&&(S(2)<0&&S(3)<0)
-        D = norm(P-A);
-    end
-    %B if the only positive is beta
-    if S(2)>0&&(S(1)<0&&S(3)<0)
-        D = norm(P-B);
-    end
-    %C if the only positive is gamma
-    if S(3)>0&&(S(1)<0&&S(1)<0)
-        D = norm(P-C);
-    end
-    %now check line segments distances
-    
+    %% since there is a problem with obtuse triangles I will need these values
+    D1 = norm(P-A);
+    D2 = norm(P-B);
+    D3 = norm(P-C);
+    % I know that if the point is external to the triangle prism, I can just
+    % calculate the distance to the edges
+    % So I will just simplify the problem and use the smallest distance
+    % between them
+    D12 = distptoline(A,B,P);
+    D23 = distptoline(B,C,P);
+    D13 = distptoline(A,C,P);
+    D = min( D1, D2, D3, D12, D23, D13);
 else
-    % don nothing D is already the distance
+    D = D0;
 end
 
 end
