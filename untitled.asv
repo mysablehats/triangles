@@ -17,7 +17,7 @@ D = distptotri(A,B,C,P);
 % if ~isequal(R,r)
 %     error('failed unit test!')
 % end
-%
+% 
 % A = [-1 0 0];
 % B = [1 0 0];
 % P = [1 1 0];
@@ -26,7 +26,7 @@ D = distptotri(A,B,C,P);
 % if ~isequal(R,r)
 %     error('failed unit test!')
 % end
-%
+% 
 % A = [0 3 10];
 % B = [3 0 10];
 % P = [1 1 10];
@@ -41,19 +41,10 @@ D = distptotri(A,B,C,P);
 function D = distptoline(A,B,P)
 %%% this is now transformed to distance to line segment!
 % based on the response from orr from https://math.stackexchange.com/questions/708499/finding-distance-from-point-to-line-determined-by-vector
-n1 = dot(P-A,B-A);
-n2 = dot(P-B,B-A);
+v1 = 
 
-if n1<=0&&n2<=0
-    % it is closer to A
-    D = norm(P-A);
-elseif n1>=0&&n2>=0
-    % it is closer to B
-    D = norm(P-B);
-else
-    projPA = dot(P-A,B-A)/(norm(B-A)).^2*(B-A);
-    D = norm(P-A-projPA);
-end
+projPA = dot(P-A,B-A)/(norm(B-A)).^2*(B-A);
+D = norm(P-A-projPA);
 end
 
 function D = distptotri(A,B,C,P)
@@ -62,7 +53,8 @@ b = C-A;
 
 N = cross(a,b)/norm(cross(a,b));
 
-p0 = P +(dot(N,A)-dot(N,P))*N;
+% no need to calculate p0 actually...
+% p0 = P +(dot(N,A)-dot(N,P))*N;
 % D = norm(P-p0);
 D0 = dot(N,A)-dot(N,P);
 
@@ -70,11 +62,20 @@ S = linsolve([A B C],p0);
 
 if any(S>1)||any(S<0)
     % this means that the point is exterior to the triangle
-
+    %must do tons of checks
+    %A if the only positive is alpha
+    %% since there is a problem with obtuse triangles I will need these values
+    D1 = norm(P-A);
+    D2 = norm(P-B);
+    D3 = norm(P-C);
+    % I know that if the point is external to the triangle prism, I can just
+    % calculate the distance to the edges
+    % So I will just simplify the problem and use the smallest distance
+    % between them
     D12 = distptoline(A,B,P);
     D23 = distptoline(B,C,P);
     D13 = distptoline(A,C,P);
-    D = min( D12, D23, D13);
+    D = min( D1, D2, D3, D12, D23, D13);
 else
     D = D0;
 end
